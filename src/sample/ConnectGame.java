@@ -58,7 +58,7 @@ public class ConnectGame {
     public String gameMessage(){
         String message=this.getCurrentPlayer();
         if(this.isOver() && !this.draw)
-            message += "wins!";
+            message += " wins!";
         else
             message += "'s Turn";
         return message;
@@ -94,6 +94,8 @@ public class ConnectGame {
             for(int i=0;i<4&&i+c<ConnectBoard.BOARD_COLUMN_NUM && count<=4;i++){
                 if(this.gameBoard.getTileAt(r,i+c)==this.currentPlayer)
                     count++;
+                else
+                    break;
             }
         for(int i=1;i<4 && c-i>=0 && count<=4;i++){
             if(this.gameBoard.getTileAt(r,c-i)==this.currentPlayer)
@@ -133,8 +135,24 @@ public class ConnectGame {
             else
                 count++;
         }
+        if(count==4)
+            this.isWon=true;
+        else {
+            count =0;
+            for (int i = 0; i < 4 && i + r < ConnectBoard.BOARD_ROW_NUM && c - i >= 0 && count <= 4; i++) {
+                if (this.gameBoard.getTileAt(r + i, c - i) != this.currentPlayer) break;
+                else
+                    count++;
+            }
 
-        if(count==4)this.isWon=true;
+            for (int i = 1; i < 4 && r - i >= 0 && c + i < ConnectBoard.BOARD_COLUMN_NUM && count <= 4; i++) {
+                if (this.gameBoard.getTileAt(r - i, c + i) != this.currentPlayer) break;
+                else
+                    count++;
+            }
+            if(count==4)
+                this.isWon=true;
+        }
 
     }
 
