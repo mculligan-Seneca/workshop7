@@ -10,11 +10,15 @@ package sample;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -37,6 +41,7 @@ public class Controller implements Initializable {
         this.gameText = new Label("");
 
 
+
     }
 
 
@@ -51,6 +56,7 @@ public class Controller implements Initializable {
         this.root.setTop(this.gameText);
         BorderPane.setMargin(this.board, new Insets(8,8,8,8));
         this.root.setCenter(this.board);
+        this.root.setBackground(new Background(new BackgroundFill(Color.BLACK,CornerRadii.EMPTY,Insets.EMPTY)));
     }
     public void setMessage(){
         if(!this.game.isDraw()) {
@@ -99,9 +105,31 @@ public class Controller implements Initializable {
                     //this.board.setRowIndex(tile,row);
                     // this.board.getChildren().add(tile);
                     this.setMessage();
+                    if(this.game.isOver()){
+                        this.addWinScreen();
+                    }
 
                 }
           });
         });
     }
+
+    public void addWinScreen(){
+        Stage stage = new Stage();
+        Scene scene;
+        Label lbl = new Label(this.gameText.getText());
+        lbl.setTextFill(this.gameText.getTextFill());
+        lbl.setStyle("-fx-font-size: 20px;");
+
+        Group g = new Group();
+        g.getChildren().add(lbl);
+        scene = new Scene(g);
+        scene.setFill(Color.BLACK);
+        stage.setTitle("Winning screen");
+        stage.setScene(scene);
+        stage.show();
+
+    }
+
+
 }
