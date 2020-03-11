@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public class AddressController implements Initializable {
     private static final double BUTTON_HEIGHT=40.0;
@@ -38,7 +39,8 @@ public class AddressController implements Initializable {
 
 
         private boolean validDataSize(String data, int size){
-            return data.length()>0 && data.length()<=size;
+            return data.length()>0 && data.length()<=size
+                    && data.indexOf(PersonalAddressLogger.DELIM)==-1;
         }
         public void initAlert(){
             Alert alert = new Alert(Alert.AlertType.ERROR,this.errMssge, ButtonType.CLOSE);
@@ -49,6 +51,12 @@ public class AddressController implements Initializable {
                         this.errMssge="";
                     });
 
+
+        }
+
+        public void initAlert(String message){
+            this.errMssge=message;
+            this.initAlert();
 
         }
 
@@ -156,35 +164,29 @@ public class AddressController implements Initializable {
         lastButton.setPrefSize(BUTTON_WIDTH,BUTTON_HEIGHT);
         updateButton.setPrefSize(BUTTON_WIDTH,BUTTON_HEIGHT);
 
-        addButton.setOnMouseClicked((e)-> {
-           if(this.validator.validatePerson()) {
-               String first = this.firstName.getText();
-               String last = this.lastName.getText();
-               Address add = new Address(this.city.getText(), this.provinceChoice.getValue(), this.postalCode.getText());
-               PersonalAddress pa = new PersonalAddress(first, last, add);
-               try {
-                   this.logger.add(pa);
-               } catch (IOException ioe) {
-                   ioe.printStackTrace();
-               }
-           }else
-               this.validator.initAlert();
-
-        });
-        firstButton.setOnMouseClicked((e)->{
-
-            PersonalAddress pa= this.logger.getFirst();
-            if(pa!=null){
-                this.firstName.setText(pa.getFirstName());
-                this.lastName.setText(pa.getLastName());
-                this.city.setText(pa.getAddress().getCity());
-                this.provinceChoice.setValue(pa.getAddress().getProv());
-                this.postalCode.setText(pa.getAddress().getPostalCode());
+        addButton.setOnMouseClicked((e)-> this.persistData((pa)-> {
+            try {
+                this.logger.add(pa);
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
             }
-            else
-                System.out.println("Error");
+        }));
+        firstButton.setOnMouseClicked((e)-> this.setData(this.logger.getFirst()));
 
+        nextButton.setOnMouseClicked((e)-> this.setData(this.logger.getNext()));
+
+        prevButton.setOnMouseClicked((e)->{
+            this.setData(this.logger.getPrevious());
         });
+        lastButton.setOnMouseClicked((e)-> this.setData(this.logger.getLast()));
+
+        updateButton.setOnMouseClicked((e)-> this.persistData((pa)-> {
+            try {
+                this.logger.update(pa);
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }));
         pane.getChildren().addAll(addButton,firstButton,nextButton,prevButton,lastButton,updateButton);
 
     }
@@ -194,6 +196,26 @@ public class AddressController implements Initializable {
     }
 
 
+public void persistData(Consumer<PersonalAddress> operation){
+    if(this.validator.validatePerson()) {
+        String first = this.firstName.getText();
+        String last = this.lastName.getText();
+        Address add = new Address(this.city.getText(), this.provinceChoice.getValue(), this.postalCode.getText());
+        PersonalAddress pa = new PersonalAddress(first, last, add);
+        operation.accept(pa);
+    }else
+        this.validator.initAlert();
+}
+public void setData(PersonalAddress personAddress){
+    if(personAddress!=null){
+        this.firstName.setText(personAddress.getFirstName());
+        this.lastName.setText(personAddress.getLastName());
+        this.city.setText(personAddress.getAddress().getCity());
+        this.provinceChoice.setValue(personAddress.getAddress().getProv());
+        this.postalCode.setText(personAddress.getAddress().getPostalCode());
+    }
+    else this.validator.initAlert("Could not retrieve Address");
+}
 
 
 }

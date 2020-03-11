@@ -14,7 +14,7 @@ public class PersonalAddressLogger {
     private static final int RECORD_SIZE=(2*PersonalAddressLogger.NAME_SIZE)+
             PersonalAddressLogger.CITY_SIZE+PersonalAddressLogger.POSTAL_SIZE+PersonalAddressLogger.PROV_SIZE+4+
             +1;
-    private static final char DELIM='|';
+    public static final char DELIM='|';
     private int currentRecord;
     private int recordNum;
     private RandomAccessFile randf;
@@ -41,6 +41,7 @@ public class PersonalAddressLogger {
     public void add(PersonalAddress personAddress)throws IOException{
         this.loadAddress(personAddress);
         this.writeAddress(this.recordNum*RECORD_SIZE,RECORD_SIZE);
+        this.currentRecord= this.recordNum;
         this.recordNum++;
     }
 
@@ -77,7 +78,6 @@ public class PersonalAddressLogger {
     private void writeAddress(int off, int len)throws IOException{
         this.randf.write(this.sb.toString().getBytes());
         this.randf.write(System.getProperty("line.separator").getBytes());
-        System.out.println(this.sb.length());
         sb.delete(0,this.sb.length());
     }
 
