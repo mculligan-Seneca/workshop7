@@ -18,8 +18,8 @@ public class ConnectGame {
     private ConnectBoard gameBoard;
     private boolean isWon;
     private boolean draw;
-
-    public ConnectGame(){
+    private static ConnectGame game = new ConnectGame();
+    private ConnectGame(){
         this.currentPlayer=ConnectPlayer.RED;
         this.nonActivePlayer= ConnectPlayer.YELLOW;
         this.gameBoard = new ConnectBoard();
@@ -28,6 +28,9 @@ public class ConnectGame {
     }
 
 
+    public static ConnectGame getGame(){
+        return ConnectGame.game;
+    }
 
     public boolean isOver(){
         return this.isWon || this.draw;
@@ -109,12 +112,12 @@ public class ConnectGame {
 
    private void verticalCheck(int r, int c){
         int count=0;
-        for(int i=0;i<4&&i+r<ConnectBoard.BOARD_ROW_NUM && count<=4;i++){
+        for(int i=0;i<4&&i+r<ConnectBoard.BOARD_ROW_NUM && count<4;i++){
            if(this.gameBoard.getTileAt(i+r,c)!=this.currentPlayer)break;
            else
                count++;
        }
-       for(int i=1;i<4 && r-i>=0 && count<=4;i++){
+       for(int i=1;i<4 && r-i>=0 && count<4;i++){
            if(this.gameBoard.getTileAt(r-i,c)!=this.currentPlayer)break;
            else
                count++;
@@ -125,12 +128,12 @@ public class ConnectGame {
 
     private void diagonalCheck(int r,int c){
         int count=0;
-        for(int i=0;i<4 &&i+r<ConnectBoard.BOARD_ROW_NUM && c+i<ConnectBoard.BOARD_COLUMN_NUM && count<=4;i++){
+        for(int i=0;i<4 &&i+r<ConnectBoard.BOARD_ROW_NUM && c+i<ConnectBoard.BOARD_COLUMN_NUM && count<4;i++){
             if(this.gameBoard.getTileAt(r+i,i+c)!=this.currentPlayer)break;
             else
                 count++;
         }
-        for(int i=1;i<4 && r-i>=0&& c-i >=0 && count<=4;i++){
+        for(int i=1;i<4 && r-i>=0&& c-i >=0 && count<4;i++){
             if(this.gameBoard.getTileAt(r-i,c-i)!=this.currentPlayer)break;
             else
                 count++;
@@ -139,13 +142,13 @@ public class ConnectGame {
             this.isWon=true;
         else {
             count =0;
-            for (int i = 0; i < 4 && i + r < ConnectBoard.BOARD_ROW_NUM && c - i >= 0 && count <= 4; i++) {
+            for (int i = 0; i < 4 && i + r < ConnectBoard.BOARD_ROW_NUM && c - i >= 0 && count < 4; i++) {
                 if (this.gameBoard.getTileAt(r + i, c - i) != this.currentPlayer) break;
                 else
                     count++;
             }
 
-            for (int i = 1; i < 4 && r - i >= 0 && c + i < ConnectBoard.BOARD_COLUMN_NUM && count <= 4; i++) {
+            for (int i = 1; i < 4 && r - i >= 0 && c + i < ConnectBoard.BOARD_COLUMN_NUM && count < 4; i++) {
                 if (this.gameBoard.getTileAt(r - i, c + i) != this.currentPlayer) break;
                 else
                     count++;

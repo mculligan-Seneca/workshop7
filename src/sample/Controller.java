@@ -18,30 +18,26 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
-import javafx.scene.Scene;
+
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
 
-    private ConnectGame game;
+
     @FXML
     private BorderPane root;
-    @FXML
+
     private GridPane board;
-    @FXML
+
     private Label gameText;
 
 
     public Controller(){
-        this.game = new ConnectGame();
         this.root= new BorderPane();
         this.board = new GridPane();
         this.gameText = new Label("");
-
-
-
     }
 
 
@@ -59,20 +55,16 @@ public class Controller implements Initializable {
         this.root.setBackground(new Background(new BackgroundFill(Color.BLACK,CornerRadii.EMPTY,Insets.EMPTY)));
     }
     public void setMessage(){
-        if(!this.game.isDraw()) {
-            this.gameText.setText(this.game.gameMessage());
-            this.gameText.setTextFill(this.game.getCurrentColor());
+        if(!ConnectGame.getGame().isDraw()) {
+            this.gameText.setText(ConnectGame.getGame().gameMessage());
+            this.gameText.setTextFill(ConnectGame.getGame().getCurrentColor());
         }
         else{
             this.gameText.setText("DRAW");
             this.gameText.setTextFill(Color.BLACK);
         }
     }
-    public boolean gameMove(int r, int c){
 
-       return this.game.move(r,c);
-
-    }
 
     public void setPlayerTile(Circle tile,Color color){
         tile.setFill(color);
@@ -92,26 +84,24 @@ public class Controller implements Initializable {
         }
     }
     public void addBoardEvent(){
-        this.board.getChildren().forEach((tile)->{
-         tile.setOnMouseClicked((e)->{
-              //  Node source = (Node)e.getSource();
-                Node source = (Node)e.getSource();
-                int row= GridPane.getRowIndex(source);
-                int column = GridPane.getColumnIndex(source);
-                Color tileColor = this.game.getCurrentColor();
-                if(this.gameMove(row,column)){
-                    this.setPlayerTile((Circle)source, tileColor);
-                    //this.board.setColumnIndex(tile,column);
-                    //this.board.setRowIndex(tile,row);
-                    // this.board.getChildren().add(tile);
-                    this.setMessage();
-                    if(this.game.isOver()){
-                        this.addWinScreen();
-                    }
+        this.board.getChildren().forEach((tile)-> tile.setOnMouseClicked((e)->{
+             //  Node source = (Node)e.getSource();
+               Node source = (Node)e.getSource();
+               int row= GridPane.getRowIndex(source);
+               int column = GridPane.getColumnIndex(source);
+               Color tileColor = ConnectGame.getGame().getCurrentColor();
+               if(ConnectGame.getGame().move(row,column)){
+                   this.setPlayerTile((Circle)source, tileColor);
+                   //this.board.setColumnIndex(tile,column);
+                   //this.board.setRowIndex(tile,row);
+                   // this.board.getChildren().add(tile);
+                   this.setMessage();
+                   if(ConnectGame.getGame().isOver()){
+                       this.addWinScreen();
+                   }
 
-                }
-          });
-        });
+               }
+         }));
     }
 
     public void addWinScreen(){

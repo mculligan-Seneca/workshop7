@@ -19,9 +19,7 @@ import javafx.stage.Stage;
 public class Connect4UI extends Application {
     public static final double TILE_RADIUS=50.0;
 
-    public Connect4UI(){
 
-    }
     @Override
     public void start(Stage primaryStage) throws Exception{
         Scene scene;
