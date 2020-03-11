@@ -1,6 +1,5 @@
 package AddressBookFile;
 
-import javafx.application.Platform;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -28,11 +27,65 @@ public class AddressController implements Initializable {
 
     private TextField postalCode;
 
-    private ChoiceBox provinceChoice;
+    private ChoiceBox<String> provinceChoice;
 
     private PersonalAddressLogger logger;
-    private Alert alertMessage;
 
+
+    private class Validation {
+
+        private String errMssge;
+
+
+        private boolean validDataSize(String data, int size){
+            return data.length()>0 && data.length()<=size;
+        }
+        public void initAlert(){
+            Alert alert = new Alert(Alert.AlertType.ERROR,this.errMssge, ButtonType.CLOSE);
+            alert.showAndWait()
+                    .filter(response-> response==ButtonType.CLOSE)
+                    .ifPresent(response -> {
+                        alert.close();
+                        this.errMssge="";
+                    });
+
+
+        }
+
+
+
+        public boolean validatePerson(){
+            boolean valid=false;
+
+            if(this.validDataSize(firstName.getText(),PersonalAddressLogger.NAME_SIZE)&&
+                    this.validDataSize(lastName.getText(),PersonalAddressLogger.NAME_SIZE)) {
+                valid = this.validateAddress();
+            }
+            else this.errMssge="Invalid Name data";
+
+            return valid;
+        }
+
+        public boolean validateAddress(){
+            boolean valid = false;
+             if(this.validDataSize(city.getText(),PersonalAddressLogger.CITY_SIZE)) {
+                 if(this.validDataSize(provinceChoice.getValue(), PersonalAddressLogger.PROV_SIZE))
+                         if(postalCode.getText().matches("[A-Za-z][0-9][A-Za-z][0-9][A-Za-z][0-9]"))
+                             valid=true;
+                         else
+                             this.errMssge="Invalid Postal code";
+                 else
+                     this.errMssge="Invalid province data";
+             }
+             else
+                 this.errMssge= "Invalid City data";
+
+             return valid;
+        }
+
+
+    }
+    private Validation validator;
     public AddressController(){
         this.firstName = new TextField();
         this.lastName = new TextField();
@@ -40,6 +93,7 @@ public class AddressController implements Initializable {
         this.postalCode = new TextField();
         this.root = new BorderPane();
         this.logger = new PersonalAddressLogger();
+        this.validator = new Validation();
 
     }
 
@@ -73,7 +127,7 @@ public class AddressController implements Initializable {
 
     public void addLocateFields(Pane pane){
         Label provinceLabel = new Label("Province: ");
-        provinceChoice = new ChoiceBox();
+        provinceChoice = new ChoiceBox<String>();
         provinceChoice.getItems().addAll("Ontario","Quebec","Alberta","Newfoundland and labrador","Prince Edward Island");
         provinceLabel.setLabelFor(provinceChoice);
         pane.getChildren().add(this.labelTextField(this.city,"City: ",TextField.DEFAULT_PREF_COLUMN_COUNT));
@@ -102,17 +156,35 @@ public class AddressController implements Initializable {
         lastButton.setPrefSize(BUTTON_WIDTH,BUTTON_HEIGHT);
         updateButton.setPrefSize(BUTTON_WIDTH,BUTTON_HEIGHT);
 
-        addButton.setOnMouseClicked((e)-> Platform.runLater(()-> {
-            String first = this.firstName.getText();
-            String last = this.lastName.getText();
-            Address add = new Address(this.city.getText(), (String) this.provinceChoice.getValue(), this.postalCode.getText());
-            try{
-                this.logger.add(new PersonalAddress(first,last,add));
-            }catch (IOException ioe){
-                ioe.printStackTrace();
-            }
+        addButton.setOnMouseClicked((e)-> {
+           if(this.validator.validatePerson()) {
+               String first = this.firstName.getText();
+               String last = this.lastName.getText();
+               Address add = new Address(this.city.getText(), this.provinceChoice.getValue(), this.postalCode.getText());
+               PersonalAddress pa = new PersonalAddress(first, last, add);
+               try {
+                   this.logger.add(pa);
+               } catch (IOException ioe) {
+                   ioe.printStackTrace();
+               }
+           }else
+               this.validator.initAlert();
 
-        }));
+        });
+        firstButton.setOnMouseClicked((e)->{
+
+            PersonalAddress pa= this.logger.getFirst();
+            if(pa!=null){
+                this.firstName.setText(pa.getFirstName());
+                this.lastName.setText(pa.getLastName());
+                this.city.setText(pa.getAddress().getCity());
+                this.provinceChoice.setValue(pa.getAddress().getProv());
+                this.postalCode.setText(pa.getAddress().getPostalCode());
+            }
+            else
+                System.out.println("Error");
+
+        });
         pane.getChildren().addAll(addButton,firstButton,nextButton,prevButton,lastButton,updateButton);
 
     }
@@ -120,4 +192,8 @@ public class AddressController implements Initializable {
     public void closeResource(){
             this.logger.close();
     }
+
+
+
+
 }

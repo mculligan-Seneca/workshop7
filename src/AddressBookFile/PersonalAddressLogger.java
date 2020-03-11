@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.time.Period;
+import java.util.Arrays;
 
 public class PersonalAddressLogger {
     public static final int NAME_SIZE=25;//for now
@@ -28,9 +29,7 @@ public class PersonalAddressLogger {
             this.sb = new StringBuilder();
             this.currentRecord=0;
             this.recordNum=(int)randf.length()/RECORD_SIZE;
-        }catch(FileNotFoundException fnf){
-            fnf.printStackTrace();
-        }catch(IOException ioe){
+        } catch(IOException ioe){
             ioe.printStackTrace();
         }
 
@@ -39,8 +38,20 @@ public class PersonalAddressLogger {
 
 
     //assumes data is valid
-    public void add(PersonalAddress personalAddress)throws IOException {
-        this.randf.seek(this.randf.length());
+    public void add(PersonalAddress personAddress)throws IOException{
+        this.loadAddress(personAddress);
+        this.writeAddress(this.recordNum*RECORD_SIZE,RECORD_SIZE);
+        this.recordNum++;
+    }
+
+    public void update(PersonalAddress personalAddress)throws IOException{
+        if(this.recordNum!=0) {
+            this.loadAddress(personalAddress);
+            this.writeAddress(this.currentRecord*RECORD_SIZE,RECORD_SIZE);
+        }
+    }
+    private void loadAddress(PersonalAddress personalAddress){
+
 
        /* int pos=0;
         pos = this.insertToken(pos,personalAddress.getFirstName(),PersonalAddressLogger.NAME_SIZE);
@@ -53,32 +64,31 @@ public class PersonalAddressLogger {
         this.sb.insert(pos++,PersonalAddressLogger.DELIM);
         pos = this.insertToken(pos,personalAddress.getAddress().getPostalCode(),PersonalAddressLogger.POSTAL_SIZE);
 */
-            this.sb.append(personalAddress.getFirstName()+"|"+personalAddress.getLastName()+"|");
-            this.sb.append(personalAddress.getAddress().getCity()+"|"+personalAddress.getAddress().getProv()+"|"+
-                    personalAddress.getAddress().getPostalCode());
+            this.sb.append(personalAddress.getFirstName()).append(PersonalAddressLogger.DELIM).append(personalAddress.getLastName()).append(PersonalAddressLogger.DELIM)
+                    .append(personalAddress.getAddress().getCity()).append(PersonalAddressLogger.DELIM).append(personalAddress.getAddress().getProv())
+                    .append(PersonalAddressLogger.DELIM).append(personalAddress.getAddress().getPostalCode());
             this.sb.setLength(RECORD_SIZE-1);
-            this.randf.write(this.sb.toString().getBytes());
-            this.randf.write(System.getProperty("line.separator").getBytes());
-            System.out.println(this.sb.length());
-        this.recordNum++;
+
+
+
+    }
+
+
+    private void writeAddress(int off, int len)throws IOException{
+        this.randf.write(this.sb.toString().getBytes());
+        this.randf.write(System.getProperty("line.separator").getBytes());
+        System.out.println(this.sb.length());
         sb.delete(0,this.sb.length());
-
-
     }
 
-    private int insertToken(int pos, String token, int tokenSize){
-        sb.insert(pos,token);
-        pos+=tokenSize;
-        
-        return pos;
-    }
 
     public PersonalAddress getLast(){
         PersonalAddress pa = null;
-        this.currentRecord=this.recordNum;
+        this.currentRecord=this.recordNum-1;
         pa= this.readAddress();
         return pa;
     }
+
 
     public PersonalAddress getFirst(){
         PersonalAddress pa =null;
@@ -107,19 +117,20 @@ public class PersonalAddressLogger {
 
     }
     public PersonalAddress readAddress(){
-        byte[] b = new byte[RECORD_SIZE];
         Address add;
         PersonalAddress personAdd=null;
         String firstName,lastName;
         if(this.recordNum>0) {
             try {
-                this.randf.read(b, RECORD_SIZE * this.currentRecord, RECORD_SIZE);
-                sb.append(b);
-                firstName = sb.delete(0, sb.indexOf("|", 0)).toString();
-                lastName = sb.delete(0, sb.indexOf("|", 0)).toString();
-                add = new Address(sb.delete(0, CITY_SIZE).toString(),
-                        sb.delete(0, PROV_SIZE).toString(),
-                        sb.delete(0, POSTAL_SIZE).toString());
+                add = new Address();
+                this.randf.seek( RECORD_SIZE * this.currentRecord);
+                this.sb.append(this.randf.readLine());
+                firstName = this.extractToken();
+                lastName = this.extractToken();
+                add.setCity(this.extractToken());
+                add.setProv(this.extractToken());
+                add.setPostalCode(this.sb.toString().trim());
+                this.sb.delete(0,this.sb.length());
                 personAdd = new PersonalAddress(firstName, lastName, add);
             } catch (IOException ioe) {
                 ioe.printStackTrace();
@@ -128,6 +139,13 @@ public class PersonalAddressLogger {
         return personAdd;
     }
 
+    public String extractToken(){
+        String token = this.sb.substring(0,
+                this.sb.indexOf(String.valueOf(PersonalAddressLogger.DELIM), 0)).trim();
+        this.sb.delete(0, sb.indexOf(String.valueOf(PersonalAddressLogger.DELIM), 0)+1);
+        return token;
+
+    }
     public void close(){
        try {
            this.randf.close();

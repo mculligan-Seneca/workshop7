@@ -12,8 +12,11 @@ public class Address {
         this.setPostalCode(postal);
    }
 
+   Address(){
+       this("","","");
+   }
    public void setPostalCode(String postal){
-       if(postal.matches("[A-Z][0-9][A-Z][0-9][A-Z][0-9]")){
+       if(postal.matches("[A-Za-z][0-9][A-Za-z][0-9][A-Za-z][0-9]")){
            this.postalCode = postal;
        }
        else
