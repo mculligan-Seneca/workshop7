@@ -42,23 +42,11 @@ public class AddressController implements Initializable {
             return data.length()>0 && data.length()<=size
                     && data.indexOf(PersonalAddressLogger.DELIM)==-1;
         }
-        public void initAlert(){
-            Alert alert = new Alert(Alert.AlertType.ERROR,this.errMssge, ButtonType.CLOSE);
-            alert.showAndWait()
-                    .filter(response-> response==ButtonType.CLOSE)
-                    .ifPresent(response -> {
-                        alert.close();
-                        this.errMssge="";
-                    });
 
 
-        }
-
-        public void initAlert(String message){
-            this.errMssge=message;
-            this.initAlert();
-
-        }
+      public String getErrMssge(){
+            return this.errMssge;
+      }
 
 
 
@@ -145,7 +133,6 @@ public class AddressController implements Initializable {
 
     public HBox labelTextField(TextField tField, String labelText, int columnCount){
         HBox hb = new HBox(5);
-        VBox vb = new VBox(5);
         Label label = new Label(labelText);
         label.setLabelFor(tField);
         tField.setPrefColumnCount(columnCount);
@@ -167,6 +154,7 @@ public class AddressController implements Initializable {
         addButton.setOnMouseClicked((e)-> this.persistData((pa)-> {
             try {
                 this.logger.add(pa);
+                AddressController.showMessage("Record Added", Alert.AlertType.INFORMATION);
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
@@ -175,14 +163,13 @@ public class AddressController implements Initializable {
 
         nextButton.setOnMouseClicked((e)-> this.setData(this.logger.getNext()));
 
-        prevButton.setOnMouseClicked((e)->{
-            this.setData(this.logger.getPrevious());
-        });
+        prevButton.setOnMouseClicked((e)-> this.setData(this.logger.getPrevious()));
         lastButton.setOnMouseClicked((e)-> this.setData(this.logger.getLast()));
 
         updateButton.setOnMouseClicked((e)-> this.persistData((pa)-> {
             try {
                 this.logger.update(pa);
+                AddressController.showMessage("Record Updated", Alert.AlertType.INFORMATION);
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
@@ -204,7 +191,7 @@ public void persistData(Consumer<PersonalAddress> operation){
         PersonalAddress pa = new PersonalAddress(first, last, add);
         operation.accept(pa);
     }else
-        this.validator.initAlert();
+       AddressController.showMessage( this.validator.getErrMssge(), Alert.AlertType.ERROR);
 }
 public void setData(PersonalAddress personAddress){
     if(personAddress!=null){
@@ -214,8 +201,16 @@ public void setData(PersonalAddress personAddress){
         this.provinceChoice.setValue(personAddress.getAddress().getProv());
         this.postalCode.setText(personAddress.getAddress().getPostalCode());
     }
-    else this.validator.initAlert("Could not retrieve Address");
+    else AddressController.showMessage("Could not retrieve Address", Alert.AlertType.ERROR);
 }
 
+
+public static void showMessage(String message, Alert.AlertType type){
+    Alert alert = new Alert(type,message, ButtonType.CLOSE);
+    alert.showAndWait()
+            .filter(response-> response==ButtonType.CLOSE)
+            .ifPresent(response -> alert.close());
+
+}
 
 }
