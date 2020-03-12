@@ -32,6 +32,7 @@ public class ConnectGame {
         return ConnectGame.game;
     }
 
+
     public boolean isOver(){
         return this.isWon || this.draw;
     }
@@ -72,7 +73,7 @@ public class ConnectGame {
     public Color getCurrentColor(){
         return this.currentPlayer.getPlayerColor();
     }
-    public Color getNonActiveColor(){ return this.nonActivePlayer.getPlayerColor();}
+    //public Color getNonActiveColor(){ return this.nonActivePlayer.getPlayerColor();}
 
     private boolean checkDraw(){
         if(this.gameBoard.isFull() && !isWon)

@@ -45,7 +45,6 @@ public class Controller implements Initializable {
     public void initialize(URL url, ResourceBundle rb){
         this.drawBoard();
         this.setMessage();
-        this.addBoardEvent();
         this.board.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
 
         BorderPane.setMargin(this.gameText,new Insets(8,8,8,8));
@@ -79,30 +78,32 @@ public class Controller implements Initializable {
             for(int j=0;j<ConnectBoard.BOARD_COLUMN_NUM;j++){
                 circle = new Circle(Connect4UI.TILE_RADIUS);
                 circle.setStyle("-fx-fill: white; -fx-stroke: black;");
+                circle.setOnMouseClicked((e)->{
+                    //  Node source = (Node)e.getSource();
+                    Node source = (Node)e.getSource();
+                    int row= GridPane.getRowIndex(source);
+                    int column = GridPane.getColumnIndex(source);
+
+                    Color tileColor = ConnectGame.getGame().getCurrentColor();
+                    if(ConnectGame.getGame().move(row,column)){
+                        this.setPlayerTile((Circle)source, tileColor);
+                        //this.board.setColumnIndex(tile,column);
+                        //this.board.setRowIndex(tile,row);
+                        // this.board.getChildren().add(tile);
+                        this.setMessage();
+                        if(ConnectGame.getGame().isOver())
+                            this.addWinScreen();
+
+
+                    }
+                });
                 board.add(circle,j,i);
             }
         }
     }
-    public void addBoardEvent(){
-        this.board.getChildren().forEach((tile)-> tile.setOnMouseClicked((e)->{
-             //  Node source = (Node)e.getSource();
-               Node source = (Node)e.getSource();
-               int row= GridPane.getRowIndex(source);
-               int column = GridPane.getColumnIndex(source);
-               Color tileColor = ConnectGame.getGame().getCurrentColor();
-               if(ConnectGame.getGame().move(row,column)){
-                   this.setPlayerTile((Circle)source, tileColor);
-                   //this.board.setColumnIndex(tile,column);
-                   //this.board.setRowIndex(tile,row);
-                   // this.board.getChildren().add(tile);
-                   this.setMessage();
-                   if(ConnectGame.getGame().isOver()){
-                       this.addWinScreen();
-                   }
 
-               }
-         }));
-    }
+
+
 
     public void addWinScreen(){
         Stage stage = new Stage();

@@ -1,3 +1,11 @@
+/*
+Stduent: Mitchell Culligan
+Workshop 7
+id: 1616293170
+email: mculligan@myseneca.ca
+Professor: Mahboob Ali
+Date: March 13th, 2020
+ */
 package AddressBookFile;
 
 import javafx.fxml.Initializable;
@@ -195,10 +203,9 @@ public class AddressController implements Initializable {
 
 public void persistData(Consumer<PersonalAddress> operation){
     if(this.validator.validatePerson()) {
-        String first = this.firstName.getText();
-        String last = this.lastName.getText();
-        Address add = new Address(this.city.getText(), this.provinceChoice.getValue(), this.postalCode.getText());
-        PersonalAddress pa = new PersonalAddress(first, last, add);
+        PersonalAddress pa = new PersonalAddress(this.firstName.getText(), this.lastName.getText(),
+                this.city.getText(), this.provinceChoice.getValue(),
+                this.postalCode.getText() );
         operation.accept(pa);
     }else
        Message.showMessage( this.validator.getErrMssge(), Alert.AlertType.ERROR);
@@ -207,9 +214,9 @@ public void setData(PersonalAddress personAddress){
     if(personAddress!=null){
         this.firstName.setText(personAddress.getFirstName());
         this.lastName.setText(personAddress.getLastName());
-        this.city.setText(personAddress.getAddress().getCity());
-        this.provinceChoice.setValue(personAddress.getAddress().getProv());
-        this.postalCode.setText(personAddress.getAddress().getPostalCode());
+        this.city.setText(personAddress.getCity());
+        this.provinceChoice.setValue(personAddress.getProv());
+        this.postalCode.setText(personAddress.getPostalCode());
     }
     else Message.showMessage("Could not retrieve Address", Alert.AlertType.ERROR);
 }

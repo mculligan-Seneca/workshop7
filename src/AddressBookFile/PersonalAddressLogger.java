@@ -6,9 +6,9 @@ import java.io.RandomAccessFile;
 
 
 public class PersonalAddressLogger {
-    public static final int NAME_SIZE=25;//for now
-    public static final int CITY_SIZE=20;
-    public static final int PROV_SIZE=35;
+    public static final int NAME_SIZE=22;//for now
+    public static final int CITY_SIZE=21;
+    public static final int PROV_SIZE=29;
     public static final int POSTAL_SIZE=6;
     private static final int RECORD_SIZE=(2*PersonalAddressLogger.NAME_SIZE)+
             PersonalAddressLogger.CITY_SIZE+PersonalAddressLogger.POSTAL_SIZE+PersonalAddressLogger.PROV_SIZE+4+
@@ -58,8 +58,8 @@ public class PersonalAddressLogger {
     }
     private void loadAddress(PersonalAddress personalAddress){
         this.sb.append(personalAddress.getFirstName()).append(PersonalAddressLogger.DELIM).append(personalAddress.getLastName()).append(PersonalAddressLogger.DELIM)
-                    .append(personalAddress.getAddress().getCity()).append(PersonalAddressLogger.DELIM).append(personalAddress.getAddress().getProv())
-                    .append(PersonalAddressLogger.DELIM).append(personalAddress.getAddress().getPostalCode());
+                    .append(personalAddress.getCity()).append(PersonalAddressLogger.DELIM).append(personalAddress.getProv())
+                    .append(PersonalAddressLogger.DELIM).append(personalAddress.getPostalCode());
         this.sb.setLength(RECORD_SIZE-1);
 
     }
@@ -108,21 +108,17 @@ public class PersonalAddressLogger {
 
     }
     public PersonalAddress readAddress(){
-        Address add;
         PersonalAddress personAdd=null;
-        String firstName,lastName;
         if(this.recordNum>0) {
             try {
-                add = new Address();
+
                 this.randf.seek( RECORD_SIZE * this.currentRecord);
                 this.sb.append(this.randf.readLine());
-                firstName = this.extractToken();
-                lastName = this.extractToken();
-                add.setCity(this.extractToken());
-                add.setProv(this.extractToken());
-                add.setPostalCode(this.sb.toString().trim());
+
+
+                personAdd = new PersonalAddress(this.extractToken(), this.extractToken(), this.extractToken(),this.extractToken()
+                ,this.sb.toString().trim());
                 this.sb.delete(0,this.sb.length());
-                personAdd = new PersonalAddress(firstName, lastName, add);
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
