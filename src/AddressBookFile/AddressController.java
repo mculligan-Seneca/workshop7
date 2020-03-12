@@ -154,22 +154,32 @@ public class AddressController implements Initializable {
         addButton.setOnMouseClicked((e)-> this.persistData((pa)-> {
             try {
                 this.logger.add(pa);
-                AddressController.showMessage("Record Added", Alert.AlertType.INFORMATION);
+                Message.showMessage("Record Added", Alert.AlertType.INFORMATION);
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
         }));
         firstButton.setOnMouseClicked((e)-> this.setData(this.logger.getFirst()));
 
-        nextButton.setOnMouseClicked((e)-> this.setData(this.logger.getNext()));
+        nextButton.setOnMouseClicked((e)->{
+                if(!this.logger.isOnLast())
+                    this.setData(this.logger.getNext());
+                 else
+                     Message.showMessage("No records after!", Alert.AlertType.WARNING);
+        });
 
-        prevButton.setOnMouseClicked((e)-> this.setData(this.logger.getPrevious()));
+        prevButton.setOnMouseClicked((e)-> {
+            if(!this.logger.isOnFirst())
+                this.setData(this.logger.getPrevious());
+            else
+                Message.showMessage("No records before!", Alert.AlertType.WARNING);
+        });
         lastButton.setOnMouseClicked((e)-> this.setData(this.logger.getLast()));
 
         updateButton.setOnMouseClicked((e)-> this.persistData((pa)-> {
             try {
                 this.logger.update(pa);
-                AddressController.showMessage("Record Updated", Alert.AlertType.INFORMATION);
+                Message.showMessage("Record Updated", Alert.AlertType.INFORMATION);
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
@@ -191,7 +201,7 @@ public void persistData(Consumer<PersonalAddress> operation){
         PersonalAddress pa = new PersonalAddress(first, last, add);
         operation.accept(pa);
     }else
-       AddressController.showMessage( this.validator.getErrMssge(), Alert.AlertType.ERROR);
+       Message.showMessage( this.validator.getErrMssge(), Alert.AlertType.ERROR);
 }
 public void setData(PersonalAddress personAddress){
     if(personAddress!=null){
@@ -201,16 +211,10 @@ public void setData(PersonalAddress personAddress){
         this.provinceChoice.setValue(personAddress.getAddress().getProv());
         this.postalCode.setText(personAddress.getAddress().getPostalCode());
     }
-    else AddressController.showMessage("Could not retrieve Address", Alert.AlertType.ERROR);
+    else Message.showMessage("Could not retrieve Address", Alert.AlertType.ERROR);
 }
 
 
-public static void showMessage(String message, Alert.AlertType type){
-    Alert alert = new Alert(type,message, ButtonType.CLOSE);
-    alert.showAndWait()
-            .filter(response-> response==ButtonType.CLOSE)
-            .ifPresent(response -> alert.close());
 
-}
 
 }

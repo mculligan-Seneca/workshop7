@@ -35,7 +35,13 @@ public class PersonalAddressLogger {
     }
 
 
+    public boolean isOnLast(){
+        return this.currentRecord==this.recordNum-1;
+    }
 
+    public boolean isOnFirst(){
+        return this.currentRecord==0;
+    }
     //assumes data is valid
     public void add(PersonalAddress personAddress)throws IOException{
         this.loadAddress(personAddress);
