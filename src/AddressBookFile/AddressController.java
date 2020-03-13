@@ -118,6 +118,8 @@ public class AddressController implements Initializable {
         this.addButtons(hb);
         BorderPane.setMargin(hb, new Insets(20, 8, 8, 8));
         this.root.setBottom(hb);
+        this.setData(this.logger.getFirst());
+
     }
 
 
